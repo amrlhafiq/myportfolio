@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Install PHP extensions required by Laravel
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     libpng-dev \
@@ -35,6 +35,9 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Create SQLite database
+RUN touch database/database.sqlite
+
 # Install frontend dependencies and build assets
 RUN npm install && npm run build
 
@@ -45,6 +48,7 @@ RUN sed -i 's|<Directory /var/www/>|<Directory /var/www/html/public>|' /etc/apac
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage \
-    /var/www/html/bootstrap/cache
+    /var/www/html/bootstrap/cache \
+    /var/www/html/database
 
 EXPOSE 80
